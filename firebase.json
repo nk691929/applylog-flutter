@@ -1,0 +1,31 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "applylog-application-tracker",
+          "appId": "1:1049215248083:android:467ede87d61edb118d1626",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "applylog-application-tracker",
+          "configurations": {
+            "android": "1:1049215248083:android:467ede87d61edb118d1626",
+            "ios": "1:1049215248083:ios:ac1659c386f591748d1626",
+            "macos": "1:1049215248083:ios:ac1659c386f591748d1626",
+            "web": "1:1049215248083:web:e48776bb0e2e44d38d1626",
+            "windows": "1:1049215248083:web:607ed018896c59638d1626"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "database": "(default)",
+    "location": "nam5",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  }
+}
