@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1049215248083",
+    "project_id": "applylog-application-tracker",
+    "storage_bucket": "applylog-application-tracker.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1049215248083:android:467ede87d61edb118d1626",
+        "android_client_info": {
+          "package_name": "com.noshtechstudios.applylog"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB14fFwVsvsUJYrYBDSkhyWaMTdcR2qp7w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
