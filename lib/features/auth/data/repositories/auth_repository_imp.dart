@@ -31,4 +31,9 @@ class FirebaseAuthRepositoryImpl extends AuthRepository {
 
   @override
   Future<void> signout() => _auth.signOut();
+
+  @override
+  Stream<bool> watchAuthState() {
+    return _auth.authStateChanges().map((user) => user != null);
+  }
 }
