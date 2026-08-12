@@ -26,9 +26,9 @@ class ApplicationModel extends Application {
         orElse: () => ApplicationStatus.applied,
       ),
       dateApplied: (json['dateApplied'] as Timestamp).toDate(),
-      source: json['source'] as String,
-      notes: json['notes'] as String,
-      followUpDate: json['followUpDate'] != null
+      source: json['source'] as String? ?? '',
+      notes: json['notes'] as String? ?? '',
+      followUpDate: json['followUpDate'] is Timestamp
           ? (json['followUpDate'] as Timestamp).toDate()
           : null,
     );
@@ -38,7 +38,7 @@ class ApplicationModel extends Application {
     return {
       'companyName': companyName,
       'roleTitle': roleTitle,
-      "status": status,
+      "status": status.name,
       'dateApplied': Timestamp.fromDate(dateApplied),
       'source': source,
       'notes': notes,
