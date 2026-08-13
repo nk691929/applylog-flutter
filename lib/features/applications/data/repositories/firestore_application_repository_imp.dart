@@ -86,7 +86,7 @@ class FirestoreApplicationRepositoryImp extends ApplicationRepository {
   }
 
   @override
-  Future<Result<void>> updateApplicationStatus(
+  Future<Result<void>> updateStatus(
     String id,
     ApplicationStatus status,
   ) async {

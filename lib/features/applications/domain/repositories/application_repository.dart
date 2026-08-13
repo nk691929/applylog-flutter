@@ -5,7 +5,7 @@ abstract class ApplicationRepository {
   Stream<Result<List<Application>>> watchApplication();
   Future<Result<void>> addApplication(Application application);
   Future<Result<void>> updateApplication(Application application);
-  Future<Result<void>> updateApplicationStatus(
+  Future<Result<void>> updateStatus(
     String id,
     ApplicationStatus status,
   );
