@@ -136,7 +136,7 @@ class _ApplicationListScreenState extends ConsumerState<ApplicationListScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            tooltip: 'Deltete Application',
+                            tooltip: 'Deletete Application',
                             onPressed: () => _confirmDelete(app),
                             icon: Icon(Icons.delete),
                           ),
@@ -145,7 +145,7 @@ class _ApplicationListScreenState extends ConsumerState<ApplicationListScreen> {
                             onSelected: (newStatus) async {
                               final result = await ref
                                   .read(applicationRepositoryProvider)
-                                  .updateApplicationStatus(app.id, newStatus);
+                                  .updateStatus(app.id, newStatus);
                               if (!mounted) return;
                               if (result case Error(failure: final failure)) {
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -184,7 +184,7 @@ class _ApplicationListScreenState extends ConsumerState<ApplicationListScreen> {
         return AlertDialog(
           title: const Text('Delete Application'),
           content: Text(
-            "Do you want to delete your application to ${application.companyName} fro ${application.roleTitle}",
+            "Do you want to delete your application to ${application.companyName} for ${application.roleTitle}",
           ),
           actions: [
             TextButton(
@@ -200,7 +200,7 @@ class _ApplicationListScreenState extends ConsumerState<ApplicationListScreen> {
       },
     );
 
-    if (shouldDelete != true && !mounted) return;
+    if (shouldDelete != true || !mounted) return;
     await _deleteApplication(application.id);
   }
 
