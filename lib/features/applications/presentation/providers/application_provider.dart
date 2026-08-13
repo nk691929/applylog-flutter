@@ -5,6 +5,12 @@ import 'package:applylog/features/applications/domain/repositories/application_r
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
+
+final selectedStatusProvider = StateProvider<ApplicationStatus?>(
+  (ref) => null,
+);
+final searchQueryProvider = StateProvider<String>((ref) => '');
 
 final applicationRepositoryProvider = Provider<ApplicationRepository>((ref) {
   return FirestoreApplicationRepositoryImp(
