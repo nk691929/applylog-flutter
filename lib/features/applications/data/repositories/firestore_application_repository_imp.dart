@@ -84,4 +84,17 @@ class FirestoreApplicationRepositoryImp extends ApplicationRepository {
       },
     );
   }
+
+  @override
+  Future<Result<void>> updateApplicationStatus(
+    String id,
+    ApplicationStatus status,
+  ) async {
+    try {
+      await _collection.doc(id).update({'status': status.name});
+      return const Success(null);
+    } catch (e) {
+      return Error(ServerFailure('Failed to update status: $e'));
+    }
+  }
 }
