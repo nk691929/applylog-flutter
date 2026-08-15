@@ -1,9 +1,9 @@
 import 'package:applylog/features/applications/domain/entities/application.dart';
 import 'package:applylog/features/applications/presentation/screens/add_application_screen.dart';
+import 'package:applylog/features/applications/presentation/screens/application_detail_screen.dart';
 import 'package:applylog/features/applications/presentation/screens/application_list_screen.dart';
 import 'package:applylog/features/auth/presentation/providers/auth_provider.dart';
 import 'package:applylog/features/auth/presentation/screens/auth_screen.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -34,10 +34,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/detail/:id',
         builder: (context, state) {
           final app = state.extra as Application;
-          return Scaffold(
-            appBar: AppBar(title: Text(app.companyName)),
-            body: Center(child: Text('${app.roleTitle} — ${app.status.name}')),
-          );
+          return ApplicationDetailScreen(application: app);
         },
       ),
     ],
