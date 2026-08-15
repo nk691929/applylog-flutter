@@ -20,7 +20,7 @@ class FirestoreApplicationRepositoryImp extends ApplicationRepository {
   }
 
   @override
-  Future<Result<void>> addApplication(Application application) async {
+  Future<Result<String>> addApplication(Application application) async {
     try {
       final model = ApplicationModel(
         id: application.id,
@@ -32,8 +32,8 @@ class FirestoreApplicationRepositoryImp extends ApplicationRepository {
         notes: application.notes,
         followUpDate: application.followUpDate,
       );
-      await _collection.add(model.toFireStore());
-      return const Success(null);
+      final document = await _collection.add(model.toFireStore());
+      return Success(document.id);
     } catch (e) {
       return Error(ServerFailure('Failed to add application: $e'));
     }
@@ -86,10 +86,7 @@ class FirestoreApplicationRepositoryImp extends ApplicationRepository {
   }
 
   @override
-  Future<Result<void>> updateStatus(
-    String id,
-    ApplicationStatus status,
-  ) async {
+  Future<Result<void>> updateStatus(String id, ApplicationStatus status) async {
     try {
       await _collection.doc(id).update({'status': status.name});
       return const Success(null);
