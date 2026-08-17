@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:applylog/core/utils/status_color.dart';
 import 'package:applylog/features/applications/domain/entities/application.dart';
 import 'package:applylog/features/applications/presentation/providers/application_provider.dart';
 import 'package:applylog/features/applications/presentation/providers/filtered_application_provider.dart';
@@ -20,23 +21,6 @@ class ApplicationListScreen extends ConsumerStatefulWidget {
 class _ApplicationListScreenState extends ConsumerState<ApplicationListScreen> {
   Timer? _searchDebounce;
   final _searchController = TextEditingController();
-
-  Color _statusColor(ApplicationStatus status) {
-    switch (status) {
-      case ApplicationStatus.applied:
-        return Colors.blue;
-      case ApplicationStatus.screening:
-        return Colors.orange;
-      case ApplicationStatus.interview:
-        return Colors.purple;
-      case ApplicationStatus.offer:
-        return Colors.green;
-      case ApplicationStatus.rejected:
-        return Colors.red;
-      case ApplicationStatus.withdrawn:
-        return Colors.grey;
-    }
-  }
 
   void _onSearchedChange(String value) {
     _searchDebounce?.cancel();
@@ -120,52 +104,69 @@ class _ApplicationListScreenState extends ConsumerState<ApplicationListScreen> {
                   itemCount: applications.length,
                   itemBuilder: (context, index) {
                     final app = applications[index];
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: _statusColor(app.status),
-                        child: Text(
-                          app.companyName[0].toUpperCase(),
-                          style: const TextStyle(color: Colors.white),
+                    return Card(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: statusColor(app.status),
+                          child: Text(
+                            app.companyName[0].toUpperCase(),
+                            style: const TextStyle(color: Colors.white),
+                          ),
                         ),
+                        title: Text(app.companyName),
+                        subtitle: Text(
+                          '${app.roleTitle} · ${app.daysSinceApplied} days ago',
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              tooltip: 'Deletete Application',
+                              onPressed: () => _confirmDelete(app),
+                              icon: Icon(Icons.delete),
+                            ),
+                            PopupMenuButton<ApplicationStatus>(
+                              initialValue: app.status,
+                              onSelected: (newStatus) async {
+                                final result = await ref
+                                    .read(applicationRepositoryProvider)
+                                    .updateStatus(app.id, newStatus);
+                                if (!mounted) return;
+                                if (result case Error(failure: final failure)) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(failure.message)),
+                                  );
+                                }
+                              },
+                              itemBuilder: (context) => ApplicationStatus.values
+                                  .map(
+                                    (s) => PopupMenuItem(
+                                      value: s,
+                                      child: Chip(
+                                        label: Text(
+                                          s.name,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                        backgroundColor: statusColor(s),
+                                        padding: EdgeInsets.zero,
+                                        visualDensity: VisualDensity.compact,
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                          ],
+                        ),
+                        onTap: () =>
+                            context.push('/detail/${app.id}', extra: app),
                       ),
-                      title: Text(app.companyName),
-                      subtitle: Text(
-                        '${app.roleTitle} · ${app.daysSinceApplied} days ago',
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            tooltip: 'Deletete Application',
-                            onPressed: () => _confirmDelete(app),
-                            icon: Icon(Icons.delete),
-                          ),
-                          PopupMenuButton<ApplicationStatus>(
-                            initialValue: app.status,
-                            onSelected: (newStatus) async {
-                              final result = await ref
-                                  .read(applicationRepositoryProvider)
-                                  .updateStatus(app.id, newStatus);
-                              if (!mounted) return;
-                              if (result case Error(failure: final failure)) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(failure.message)),
-                                );
-                              }
-                            },
-                            itemBuilder: (context) => ApplicationStatus.values
-                                .map(
-                                  (s) => PopupMenuItem(
-                                    value: s,
-                                    child: Chip(label: Text(s.name)),
-                                  ),
-                                )
-                                .toList(),
-                          ),
-                        ],
-                      ),
-                      onTap: () =>
-                          context.push('/detail/${app.id}', extra: app),
                     );
                   },
                 );
@@ -223,7 +224,6 @@ class _ApplicationListScreenState extends ConsumerState<ApplicationListScreen> {
     }
   }
 
-  //Filter Status Widget
   Widget _buildStatusFilter() {
     return SizedBox(
       height: 50,
@@ -252,7 +252,6 @@ class _ApplicationListScreenState extends ConsumerState<ApplicationListScreen> {
     );
   }
 
-  //Filter Chips for status
   Widget _buildFilterChip({
     required String label,
     required bool selected,

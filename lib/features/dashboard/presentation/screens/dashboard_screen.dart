@@ -1,6 +1,8 @@
+import 'package:applylog/core/utils/status_color.dart';
 import 'package:applylog/features/dashboard/presentation/providers/dashboard_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -17,6 +19,33 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       appBar: AppBar(title: Text("Dashboard")),
       body: dashboardAsync.when(
         data: (stats) {
+          if (stats.total == 0) {
+            return Center(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.bar_chart, size: 64, color: Colors.grey),
+                    SizedBox(height: 16),
+                    Text(
+                      "No data yet",
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      "Add your first application to see stats here.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                    SizedBox(height :10),
+                    ElevatedButton(onPressed: ()=>context.push("/add"), child: Text("Add"))
+                  ],
+                ),
+              ),
+            );
+          }
+
           return Padding(
             padding: EdgeInsets.all(16),
             child: Column(
@@ -53,6 +82,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         SizedBox(width: 100, child: Text(entry.key.name)),
                         Expanded(
                           child: LinearProgressIndicator(
+                            color: statusColor(entry.key),
                             minHeight: 8,
                             value: stats.total == 0
                                 ? 0
