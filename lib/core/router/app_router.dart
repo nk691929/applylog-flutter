@@ -1,3 +1,4 @@
+import 'package:applylog/core/router/scaffold_with_swipe.dart';
 import 'package:applylog/features/applications/domain/entities/application.dart';
 import 'package:applylog/features/applications/presentation/screens/add_application_screen.dart';
 import 'package:applylog/features/applications/presentation/screens/application_detail_screen.dart';
@@ -6,7 +7,6 @@ import 'package:applylog/features/auth/presentation/providers/auth_provider.dart
 import 'package:applylog/features/auth/presentation/screens/auth_screen.dart';
 import 'package:applylog/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:applylog/features/settings/presentation/screens/settings_screen.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -36,28 +36,22 @@ final routerProvider = Provider<GoRouter>((ref) {
           return ApplicationDetailScreen(application: app);
         },
       ),
-      StatefulShellRoute.indexedStack(
+      GoRoute(
+        path: '/edit/:id',
+        builder: (context, state) {
+          final application = state.extra as Application;
+          return AddApplicationScreen(application: application);
+        },
+      ),
+      StatefulShellRoute(
         builder: (context, state, navigationShell) {
-          return Scaffold(
-            body: navigationShell,
-            bottomNavigationBar: BottomNavigationBar(
-              currentIndex: navigationShell.currentIndex,
-              onTap: (value) => navigationShell.goBranch(value),
-              items: const [
-                BottomNavigationBarItem(
-                  label: "Dashboard",
-                  icon: Icon(Icons.dashboard),
-                ),
-                BottomNavigationBarItem(
-                  label: "Applications",
-                  icon: Icon(Icons.settings_applications),
-                ),
-                BottomNavigationBarItem(
-                  label: "Settings",
-                  icon: Icon(Icons.settings),
-                ),
-              ],
-            ),
+          return navigationShell;
+        },
+        navigatorContainerBuilder: (context, navigationShell, children) {
+          return ScaffoldWithSwipe(
+            navigationShell: navigationShell,
+            children:
+                children, 
           );
         },
         branches: [
@@ -81,7 +75,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: "/settings",
-                builder: ((context, state) => const SettingsScreen()),
+                builder: (context, state) => const SettingsScreen(),
               ),
             ],
           ),
