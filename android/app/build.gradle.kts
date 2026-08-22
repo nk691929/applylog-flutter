@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "com.noshtechstudios.applylog"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
