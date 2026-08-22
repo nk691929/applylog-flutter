@@ -36,4 +36,19 @@ class FirebaseAuthRepositoryImpl extends AuthRepository {
   Stream<bool> watchAuthState() {
     return _auth.authStateChanges().map((user) => user != null);
   }
+
+  @override
+  Future<Result<void>> sendPasswordResetEmail(String email) async {
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+
+      return const Success(null);
+    } on FirebaseAuthException catch (e) {
+      return Error(
+        ServerFailure(e.message ?? 'Unable to send password reset email.'),
+      );
+    } catch (e) {
+      return Error(ServerFailure('Something went wrong. Please try again.'));
+    }
+  }
 }

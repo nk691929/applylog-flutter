@@ -5,4 +5,5 @@ abstract class AuthRepository {
   Future<Result<void>> signUp(String email,String password);
   Future<void> signOut();
   Stream<bool> watchAuthState();
+  Future<Result<void>> sendPasswordResetEmail(String email);
 }
