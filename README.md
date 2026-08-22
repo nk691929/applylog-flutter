@@ -1,594 +1,106 @@
 # ApplyLog
 
-> A production-oriented Flutter application for managing, tracking, and analyzing job applications from a single workspace.
+A job application tracker built with Flutter, Firebase, and real-time Firestore streams — built to solve a real, current problem: tracking every job application, its status, and follow-ups, instead of losing track across scattered notes.
 
-ApplyLog is being built as a real-world Flutter portfolio project rather than a tutorial application.
+## Screenshots
 
-The goal is to simulate the architecture, engineering practices, and product decisions expected in a professional Flutter development environment.
+| Application List | Dashboard | Add Application | Login |
+|---|---|---|---|
+| ![list](screenshots/list.png) | ![dashboard](screenshots/dashboard.png) | ![add](screenshots/add.png) | ![login](screenshots/login.png) |
 
----
+## Features
 
-## 🚧 Project Status
+- [x] Real-time application list synced via Firestore `.snapshots()` — updates live, no manual refresh
+- [x] Status pipeline: Applied → Screening → Interview → Offer → Rejected → Withdrawn
+- [x] Debounced search and status filter chips, composed via Riverpod providers
+- [x] Firebase Authentication with auth-based routing redirect (go_router)
+- [x] Follow-up reminder notifications via `flutter_local_notifications`, with swipeable bottom navigation and custom app/notification icons
+- [x] Dashboard with response rate, total applications, and status breakdown — all derived from the same live stream, no duplicate fetches
+- [x] Delete with confirmation dialog
+- [x] Dark mode
+- [x] Bottom navigation via `StatefulShellRoute`, preserving tab state, with swipe-to-switch between tabs
+- [x] Empty and error states throughout
+- [x] Battery optimization exemption request for improved notification reliability
 
-**Current Progress: Day 4 / 6**
+## Architecture
 
-| Area | Status |
-|---|---|
-| Flutter architecture | ✅ |
-| Firebase integration | ✅ |
-| Firebase Authentication | ✅ |
-| Firestore persistence | ✅ |
-| Real-time application stream | ✅ |
-| Add application | ✅ |
-| Application status management | ✅ |
-| Status filtering | ✅ |
-| Local search | ✅ |
-| Debounced search | ✅ |
-| Delete application | ✅ |
-| Delete confirmation | ✅ |
-| Local notification infrastructure | ✅ |
-| Follow-up reminder scheduling | ⚠️ Device testing |
-| Application detail screen | ✅ |
-| Dashboard | ⏳ |
-| Dark mode | ⏳ |
-| Navigation polish | ⏳ |
-| Automated tests | ⏳ |
-| Final documentation | ⏳ |
-
-> **Note:** Scheduled notifications are implemented and successfully registered with Android. Testing on the development device indicates device-level background/alarm restrictions rather than an application scheduling failure.
-
----
-
-# ✨ Features
-
-## Authentication
-
-- Firebase Authentication
-- Login
-- Signup
-- Authentication state monitoring
-- Automatic navigation based on authentication state
-- Protected application routes
-
----
-
-## Application Management
-
-Track job applications with:
-
-- Company name
-- Role title
-- Application status
-- Application date
-- Application source
-- Notes
-- Follow-up date
-
-Supported application statuses:
-
-```text
-Applied
-Screening
-Interview
-Offer
-Rejected
-Withdrawn
-
-
-Real-Time Application Updates:
-Applications are stored in Cloud Firestore and consumed through a real-time stream.
-Firestore
-    ↓
-Repository
-    ↓
-Stream<Result<List<Application>>>
-    ↓
-Riverpod
-    ↓
-UI
-
-
-Search:
-
-ApplyLog provides local application searching with debouncing.
-
-Instead of processing every keystroke:
-
-F
-Fl
-Flu
-Flut
-Flutt
-Flutter
-
-the application waits briefly before updating the search query.
-
-This reduces unnecessary processing and provides a smoother user experience.
-
-
-
-Status Filtering:
-Applications can be filtered locally by:
-
-All
-Applied
-Screening
-Interview
-Offer
-Rejected
-Withdrawn
-
-The current implementation performs filtering locally because the complete application stream is already available to the client.
-
-For significantly larger datasets, server-side filtering and pagination can be introduced.
-
-
-
-Status Updates:
-Application status can be changed directly from the application list.
-
-Example:
-
-Applied
-   ↓
-Screening
-   ↓
-Interview
-   ↓
-Offer
-The status is persisted in Firestore and automatically reflected through the real-time stream.
-
-Application Details
-
-The detail screen provides:
-
-Company
-Role
-Current status
-Application date
-Days since application
-Application source
-Follow-up date
-Notes
-Delete action
-Delete Confirmation
-
-Applications cannot be deleted accidentally without confirmation.
-
-The delete flow is designed around:
-
-User requests deletion
-        ↓
-Confirmation dialog
-        ↓
-Repository operation
-        ↓
-Result handling
-        ↓
-UI feedback
-🔔 Follow-Up Notifications
-
-ApplyLog includes a local notification infrastructure for job follow-up reminders.
-
-Technology:
-
-flutter_local_notifications
-timezone
-Android exact alarms
-
-The scheduling pipeline is:
-
-Follow-up Date
-      ↓
-Notification Use Case
-      ↓
-Notification Repository
-      ↓
-Local Notification Service
-      ↓
-Android Alarm Manager
-      ↓
-Local Notification
-
-The application correctly:
-
-Initializes notification services
-Requests notification permission
-Requests exact-alarm permission
-Creates a notification channel
-Converts dates using the configured timezone
-Schedules reminders
-Cancels reminders
-
-Scheduled notification testing is currently being validated on the physical Android device.
-
-🏗️ Architecture
-
-ApplyLog follows a feature-oriented Clean Architecture approach.
-
+Feature-first Clean Architecture, same pattern used across all layers:
 lib/
 │
 ├── core/
-│   ├── errors/
-│   ├── notifications/
-│   └── router/
+│ │
+│ ├── errors/
+│ │ └── Failure and Result sealed classes
+│ │ └── Compile-time enforced error handling
+│ │
+│ ├── router/
+│ │ ├── go_router configuration, auth-aware redirects
+│ │ └── Swipeable StatefulShellRoute wrapper
+│ │
+│ ├── theme/
+│ │ └── Dark mode theme provider
+│ │
+│ ├── notifications/
+│ │ ├── domain/
+│ │ │ ├── repositories/notification_repository.dart
+│ │ │ └── usecases/schedule_follow_up_reminder.dart
+│ │ ├── data/
+│ │ │ └── local_notification_service.dart
+│ │ └── presentation/providers/
+│ │
+│ └── utils/
+│ └── Shared status color and date formatting utilities
 │
 ├── features/
-│   ├── auth/
-│   │   ├── data/
-│   │   ├── domain/
-│   │   └── presentation/
-│   │
-│   └── applications/
-│       ├── data/
-│       ├── domain/
-│       └── presentation/
+│ │
+│ ├── auth/
+│ │ ├── data/FirebaseAuthRepositoryImpl
+│ │ ├── domain/AuthRepository interface
+│ │ └── presentation/Login, Signup, auth state provider
+│ │
+│ ├── applications/
+│ │ ├── data/ApplicationModel, Firestore repository implementation
+│ │ ├── domain/Application entity, ApplicationRepository interface
+│ │ └── presentation/List, Detail, Add screens, search/filter providers
+│ │
+│ ├── dashboard/
+│ │ └── presentation/Statistics screen
+│ │
+│ └── settings/
+│ └── presentation/Settings screen, notification & battery permission prompts
 │
 └── main.dart
-🧱 Clean Architecture Layers
-Presentation
 
-Responsible for:
 
-Screens
-Widgets
-Riverpod providers
-UI state
-User interactions
-Presentation
-     ↓
-Domain
-Domain
+**Key architectural decisions:**
 
-Contains business rules and contracts.
+- **Real-time over one-time fetches.** `ApplicationRepository.watchApplications()` returns `Stream<Result<List<Application>>>`, wrapping Firestore's live `.snapshots()` — the UI updates automatically when data changes, with no manual refresh calls anywhere in the app.
+- **Provider composition over widget-local state.** Search and status filtering are implemented as composed Riverpod providers (`filteredApplicationsProvider` watches the live stream + filter state together) rather than local `setState()`. The Dashboard's stats are derived from the exact same underlying stream with zero duplicate Firestore reads.
+- **A real Use Case, added when it earned its complexity.** Most operations (add/update/delete) call the repository interface directly from the presentation layer — deliberately, since there's no business logic to isolate for simple CRUD. `ScheduleFollowUpReminder` is the one place a formal Use Case was introduced, because scheduling a reminder involves real orchestration (permission requests + notification scheduling) that benefits from being centralized.
+- **Deterministic notification IDs.** Firestore document IDs are strings; Android notification IDs must be positive 32-bit integers. A custom polynomial hash (not Dart's built-in `String.hashCode`, which isn't guaranteed identical across compilation targets) converts one to the other deterministically, so the same application always maps to the same notification ID.
 
-Examples:
+## Known Issue — Notification Delivery on Killed App State
 
-Entities
-Repository interfaces
-Use cases
+Follow-up reminders are fully functional and verified while the app is in the foreground or backgrounded — confirmed on real hardware (Tecno, Infinix). When the app process is fully killed, delivery becomes unreliable on some Transsion HiOS-based devices.
 
-The domain layer does not depend directly on Firebase or Flutter infrastructure.
+Debugging process: scheduling was confirmed correct at the OS level via `pendingNotificationRequests()`, and delivery in foreground/background was fixed by explicitly declaring `ScheduledNotificationReceiver` in the manifest (not auto-merged correctly in this project's build). To isolate whether the remaining killed-state issue was app-specific or platform-specific, I cloned and ran the official `flutter_local_notifications` example app on the same hardware — it exhibited the same limitation, confirming this is a known Android OEM constraint (aggressive process termination on HiOS), not an implementation bug. Documented here rather than hidden, as an example of isolating a bug down to its actual root cause instead of guessing indefinitely.
 
-Data
+## Tech Stack
 
-Responsible for external data sources and implementations.
+- **State Management:** Riverpod — `StreamProvider` for live auth/data watching, composed `Provider`s for derived state, `Notifier` for simple synchronous state (theme)
+- **Backend:** Firebase (Authentication, Firestore)
+- **Routing:** go_router — auth-aware redirect, `StatefulShellRoute` with swipeable bottom navigation
+- **Notifications:** flutter_local_notifications, timezone-aware exact scheduling, explicit manifest receiver configuration
+- **Error Handling:** Sealed `Result`/`Failure` pattern, enforcing compile-time handling of success/error cases
 
-Examples:
+## Getting Started
 
-Firestore repository
-Firebase Authentication
-Data models
-Serialization/deserialization
-Firestore
-    ↓
-Data Source / Repository Implementation
-    ↓
-Domain Entity
-🔄 Result-Based Error Handling
+```bash
+flutter pub get
+flutterfire configure   # connect your own Firebase project
+flutter run
+```
 
-The application uses a Result abstraction instead of exposing raw infrastructure exceptions throughout the application.
+## What I Learned Building This
 
-Conceptually:
-
-Success<T>
-Error<Failure>
-
-This allows the presentation layer to handle successful and failed operations explicitly.
-
-Example:
-
-switch (result) {
-  case Success():
-    // success
-  case Error(failure: final failure):
-    // show failure
-}
-🧠 State Management
-
-ApplyLog uses Riverpod for dependency injection and application state management.
-
-Current examples include:
-
-Authentication state
-Firestore application stream
-Search query
-Selected status filter
-Filtered applications
-Notification dependencies
-
-The project intentionally avoids putting business logic directly inside widgets where it can be moved into providers or domain services.
-
-🧭 Navigation
-
-Navigation is handled using go_router.
-
-Current routes include:
-
-/auth
-/
- /add
-/detail/:id
-
-Authentication state controls access to protected routes.
-
-🔥 Backend
-
-ApplyLog uses Firebase services.
-
-Firebase Authentication
-
-Used for:
-
-Account creation
-Login
-Authentication state
-Cloud Firestore
-
-Used for:
-
-Application persistence
-Real-time updates
-Status changes
-Application deletion
-
-Data is scoped to the authenticated user:
-
-users/
-  {userId}/
-    applications/
-      {applicationId}
-
-This prevents applications from different users being mixed together.
-
-🛠️ Tech Stack
-Technology	Purpose
-Flutter	Cross-platform UI
-Dart	Programming language
-Riverpod	State management / DI
-GoRouter	Navigation
-Firebase Auth	Authentication
-Cloud Firestore	Backend database
-Flutter Local Notifications	Local reminders
-Timezone	Timezone-aware scheduling
-Git	Version control
-📅 Development Roadmap
-Day 1 — Architecture & Firebase
-Completed
-Project architecture
-Feature-based folder structure
-Firebase configuration
-Application entity
-Application model
-Failure abstraction
-Result abstraction
-Authentication screens
-Authentication state
-Day 2 — Repository & Real-Time Applications
-Completed
-Firestore repository
-Repository abstraction
-Application stream
-Riverpod stream provider
-Application list
-Empty state
-Add application flow
-Real-time Firestore updates
-Day 3 — Application Pipeline
-Completed
-Status filter chips
-Local search
-Debounced search
-Status update
-Firestore status persistence
-Delete application
-Delete confirmation
-UI feedback for failures
-Day 4 — Notifications & Details
-Completed
-Notification repository
-Local notification service
-Notification initialization
-Android notification channel
-Notification permission
-Exact alarm permission
-Timezone configuration
-Follow-up reminder scheduling
-Reminder cancellation
-Application detail screen
-Detail navigation
-Remaining
-Finalize scheduled notification testing across devices
-Connect follow-up dates from application data to notification scheduling
-Complete production-level delete flow on detail screen
-🚀 Day 5 — Dashboard & Product Polish
-
-Planned:
-
-Dashboard
-
-Display:
-
-Total applications
-Applications by status
-Interviews
-Offers
-Rejections
-Response rate
-Recent applications
-
-Potential visualization:
-
-Applications
-│
-├── Applied
-├── Screening
-├── Interview
-├── Offer
-├── Rejected
-└── Withdrawn
-UI Improvements
-Dark mode
-Theme configuration
-Navigation polish
-Responsive layouts
-Improved empty states
-Better loading states
-Better error states
-🧪 Day 6 — Testing & Release Preparation
-
-Planned:
-
-Unit tests
-Repository tests
-Provider tests
-Widget tests
-Error-state testing
-Empty-state testing
-README improvements
-Architecture diagram
-Screenshots
-Git history cleanup
-Final GitHub release
-📊 Future Improvements
-
-The project is intentionally designed so additional production features can be added without restructuring the entire application.
-
-Potential future improvements:
-
-Firestore pagination
-Server-side search
-Advanced filtering
-Application timeline
-Interview tracking
-Multiple follow-up reminders
-Notification deep linking
-Resume attachment
-Company contacts
-Interview notes
-Salary tracking
-Job source tracking
-Analytics
-Export applications
-Backup and restore
-Offline-first synchronization
-🎯 Engineering Goals
-
-ApplyLog is being developed with the following principles:
-
-Maintainability
-
-Business logic should remain independent from UI and infrastructure.
-
-Testability
-
-Dependencies are abstracted through repositories and providers.
-
-Scalability
-
-The architecture should support additional features without turning the application into a monolithic codebase.
-
-Reliability
-
-Errors, loading states, empty states, and asynchronous operations are explicitly handled.
-
-User Experience
-
-The application should remain responsive and predictable even when network operations fail.
-
-📈 Current Development Progress
-Day 1  ████████████████████ 100%
-Day 2  ████████████████████ 100%
-Day 3  ████████████████████ 100%
-Day 4  ███████████████████░  90%
-Day 5  █████░░░░░░░░░░░░░░░  25%
-Day 6  ░░░░░░░░░░░░░░░░░░░░   0%
-Overall
-
-Approximately 75% of the planned MVP is complete.
-
-📱 Screens
-
-Screens currently implemented:
-
-Login
-Signup
-Application List
-Add Application
-Application Detail
-
-More screenshots will be added after the final UI polish phase.
-
-🔐 Security
-
-Application data is scoped to the authenticated Firebase user.
-
-The intended Firestore security model is:
-
-Authenticated User
-       ↓
-users/{uid}
-       ↓
-users/{uid}/applications
-
-Firestore security rules should ensure users can only access their own application records.
-
-🧑‍💻 Development Philosophy
-
-This project is intentionally being developed as a simulation of professional Flutter development.
-
-The focus is not simply on making screens work.
-
-The project emphasizes:
-
-Clean Architecture
-Separation of concerns
-Repository pattern
-Dependency injection
-Reactive state management
-Error handling
-Maintainable code
-Real-time data
-Production-oriented feature design
-Meaningful Git history
-📌 Project Goals
-
-The final version of ApplyLog aims to demonstrate that the developer understands more than Flutter UI development.
-
-It demonstrates the ability to build a complete application involving:
-
-UI
- ↓
-State Management
- ↓
-Business Logic
- ↓
-Repository Abstraction
- ↓
-Firebase
- ↓
-Real-Time Data
-
-alongside:
-
-Local Notifications
-Authentication
-Navigation
-Error Handling
-Testing
-Documentation
-⭐ Why ApplyLog?
-
-Job applications are often tracked using spreadsheets, notes, or scattered messages.
-
-ApplyLog provides a dedicated workspace where developers can track:
-
-What they applied for → where they are in the hiring pipeline → when to follow up → what happened next.
-
-The project is designed to turn that simple idea into a realistic, maintainable Flutter application.
-
-📄 License
-
-This project is currently being developed as a personal portfolio project.
-
-Built with Flutter & Dart.
+Beyond extending REST-based Clean Architecture patterns into a Firebase, real-time context, the most valuable part of this project was a genuine debugging investigation: isolating a silent notification-delivery failure by comparing my implementation against an unmodified reference app on identical hardware, rather than guessing at fixes. That process — narrowing "it doesn't work" down to a specific, verifiable root cause — mattered more than the fix itself.
