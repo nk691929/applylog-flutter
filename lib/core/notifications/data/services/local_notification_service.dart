@@ -75,6 +75,7 @@ class LocalNotificationService implements NotificationRepository {
         channelDescription: _channelDescription,
         importance: Importance.high,
         priority: Priority.high,
+        icon:'ic_notifications',
       ),
     );
 
