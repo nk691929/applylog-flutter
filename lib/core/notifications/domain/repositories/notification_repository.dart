@@ -7,5 +7,4 @@ abstract interface class NotificationRepository {
     required DateTime scheduledDate,
   });
   Future<void> cancelReminder(int id);
-  Future<void> showTestNotification();
 }

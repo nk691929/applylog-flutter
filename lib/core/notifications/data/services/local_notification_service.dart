@@ -1,5 +1,4 @@
 import 'package:applylog/core/notifications/domain/repositories/notification_repository.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
@@ -30,9 +29,18 @@ class LocalNotificationService implements NotificationRepository {
     tz.setLocalLocation(tz.getLocation('Asia/Karachi'));
 
     const androidSettings = AndroidInitializationSettings(
-      '@mipmap/ic_launcher',
+      'ic_notifications',
     );
-    const settings = InitializationSettings(android: androidSettings);
+
+    const iosSettings = DarwinInitializationSettings(
+      defaultPresentAlert: true,
+      defaultPresentBadge: true,
+      defaultPresentBanner: true,
+    );
+    const settings = InitializationSettings(
+      android: androidSettings,
+      iOS: iosSettings,
+    );
     await _plugin.initialize(settings: settings);
 
     final androidPlugin = _plugin
@@ -72,49 +80,18 @@ class LocalNotificationService implements NotificationRepository {
 
     final scheduled = tz.TZDateTime.from(scheduledDate, tz.local);
 
-    debugPrint('TZ NOW: ${tz.TZDateTime.now(tz.local)}');
-    debugPrint('TZ SCHEDULED: $scheduled');
-
     await _plugin.zonedSchedule(
       id: id,
       title: 'Follow-up reminder',
       body: 'Time to follow up on your application to $companyName.',
       scheduledDate: scheduled,
       notificationDetails: notificationDetails,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-    );
-
-    debugPrint('Notification scheduled successfully.');
-    final pending = await _plugin.pendingNotificationRequests();
-
-    debugPrint(
-      'Pending notifications: ${pending.map((e) => '${e.id}: ${e.title}').toList()}',
+      androidScheduleMode: AndroidScheduleMode.alarmClock,
     );
   }
 
   @override
   Future<void> cancelReminder(int id) async {
     await _plugin.cancel(id: id);
-
-    debugPrint('Notification cancelled: $id');
-  }
-
-  Future<void> showTestNotification() async {
-    final details = NotificationDetails(
-      android: AndroidNotificationDetails(
-        _followUpChannel.id,
-        _followUpChannel.name,
-        channelDescription: _followUpChannel.description,
-        importance: Importance.high,
-        priority: Priority.high,
-      ),
-    );
-
-    await _plugin.show(
-      id: 999,
-      title: 'ApplyLog Test',
-      body: 'Local notification is working.',
-      notificationDetails: details,
-    );
   }
 }
